@@ -7,7 +7,7 @@ extern "C" {
 
 #include <stdint.h>
 
-void usb_process_packet(uint8_t *buf, uint32_t len);
+void usb_process_packet(uint8_t *buf, uint32_t len, uint8_t endpoint_pair);
 void serve_on_usb(void);
 
 #ifdef __cplusplus

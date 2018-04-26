@@ -12,6 +12,7 @@
 
 static uint8_t* usb_buf;
 static uint32_t usb_len;
+static uint8_t active_endpoint_pair;
 
 // FIXME: the stdlib doesn't know about CMSIS threads, so this is just a global variable
 static thread_local uint32_t deadline_ms = 0;
@@ -30,7 +31,7 @@ public:
         // transmit packet
         uint8_t status = CDC_Transmit_FS(
                 const_cast<uint8_t*>(buffer) /* casting this const away is safe because...
-                well... it's not actually. Stupid STM. */, length);
+                well... it's not actually. Stupid STM. */, length, active_endpoint_pair);
         return (status == USBD_OK) ? 0 : -1;
     }
 } usb_packet_output;
@@ -83,16 +84,17 @@ static void usb_server_thread(void * ctx) {
 #elif defined(USB_PROTOCOL_ASCII)
             ASCII_protocol_parse_stream(usb_buf, usb_len, usb_stream_output);
 #endif
-            USBD_CDC_ReceivePacket(&hUsbDeviceFS);  // Allow next packet
+            USBD_CDC_ReceivePacket(&hUsbDeviceFS, active_endpoint_pair);  // Allow next packet
         }
     }
 }
 
 // Called from CDC_Receive_FS callback function, this allows the communication
 // thread to handle the incoming data
-void usb_process_packet(uint8_t *buf, uint32_t len) {
+void usb_process_packet(uint8_t *buf, uint32_t len, uint8_t endpoint_pair) {
     usb_buf = buf;
     usb_len = len;
+    active_endpoint_pair = endpoint_pair;
     osSemaphoreRelease(sem_usb_rx);
 }
 
