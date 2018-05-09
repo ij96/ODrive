@@ -35,7 +35,7 @@ left_hip_slide_position    = []
 left_ankle_pitch_position  = []
 
 j = -1
-filePath = '***REMOVED***'
+filePath = './'
 
 with open(filePath + 'traj_test.csv') as csvfile:
 	readCSV = csv.reader(csvfile, delimiter=',')
