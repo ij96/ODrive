@@ -32,7 +32,7 @@
 // This value is updated by the DC-bus reading ADC.
 // Arbitrary non-zero inital value to avoid division by zero if ADC reading is late
 float vbus_voltage = 12.0f;
-#define ENCODER_CPR (4000) // Default resolution of CUI-AMT102 encoder
+
 #if HW_VERSION_MAJOR == 3
 #if HW_VERSION_MINOR <= 3
 #define SHUNT_RESISTANCE (675e-6f)
@@ -66,7 +66,7 @@ Motor_t motors[] = {
         .vel_integrator_current = 0.0f,  // [A]
         .vel_limit = 20000.0f,           // [counts/s]
         .current_setpoint = 0.0f,        // [A]
-        .calibration_current = 20.0f,    // [A]
+        .calibration_current = 10.0f,    // [A]
         .resistance_calib_max_voltage = 1.0f, // [V] - You may need to increase this if this voltage isn't sufficient to drive calibration_current through the motor.
         .dc_bus_undervoltage_trip_level = 8.0f, // [V]
         .dc_bus_overvoltage_trip_level = VBUS_OVERVOLTAGE_LEVEL, // [V]
@@ -123,7 +123,7 @@ Motor_t motors[] = {
             .index_found = false,
             .manually_calibrated = false,
             .idx_search_speed = 10.0f, // [rad/s electrical]
-            .encoder_cpr = ENCODER_CPR, // Default resolution of CUI-AMT102 encoder,
+            .encoder_cpr = (2048 * 4), // Default resolution of CUI-AMT102 encoder,
             .encoder_offset = 0,
             .encoder_state = 0,
             .motor_dir = 1,   // 1 or -1
@@ -175,7 +175,7 @@ Motor_t motors[] = {
         .vel_integrator_current = 0.0f,           // [A]
         .vel_limit = 20000.0f,                    // [counts/s]
         .current_setpoint = 0.0f,                 // [A]
-        .calibration_current = 20.0f,             // [A]
+        .calibration_current = 10.0f,             // [A]
         .resistance_calib_max_voltage = 1.0f, // [V] - You may need to increase this if this voltage isn't sufficient to drive calibration_current through the motor.
         .dc_bus_undervoltage_trip_level = 8.0f, // [V]
         .dc_bus_overvoltage_trip_level = VBUS_OVERVOLTAGE_LEVEL, // [V]
@@ -229,7 +229,7 @@ Motor_t motors[] = {
             .index_found = false,
             .manually_calibrated = false,
             .idx_search_speed = 10.0f, // [rad/s electrical]
-            .encoder_cpr = ENCODER_CPR, // Default resolution of CUI-AMT102 encoder,
+            .encoder_cpr = (2048 * 4), // Default resolution of CUI-AMT102 encoder,
             .encoder_offset = 0,
             .encoder_state = 0,
             .motor_dir = 1,   // 1 or -1

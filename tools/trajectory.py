@@ -25,6 +25,30 @@ else:
     print("Found {} ODrives\n".format(len(ODriveSet)))
     my_drive = ODriveSet[1]
 
+#################### parameter configuration ###################################
+ENCODER_CPR = 4000
+
+for drive in ODriveSet:
+    # M0
+    drive.motor0.encoder.config.cpr = ENCODER_CPR
+    drive.motor0.config.pole_pairs = 7
+    drive.motor0.config.calibration_current = 20.0
+    # M1
+    drive.motor1.encoder.config.cpr = ENCODER_CPR
+    drive.motor1.config.pole_pairs = 7
+    drive.motor1.config.calibration_current = 20.0
+
+#################### PID tuning ################################################
+for drive in ODriveSet:
+    # M0
+    drive.motor0.config.pos_gain = 5.0             # [(counts/s) / counts]
+    drive.motor0.config.vel_gain = 3.0 / 10000.0   # [A/(counts/s)]
+    drive.motor0.config.vel_integrator_gain = 10.0 / 10000.0
+    # M1
+    drive.motor1.config.pos_gain = 20.0            # [(counts/s) / counts]
+    drive.motor1.config.vel_gain = 5.0 / 10000.0   # [A/(counts/s)]
+    drive.motor1.config.vel_integrator_gain = 10.0 / 10000.0
+
 #################### read-in trajectory from file ##############################
 
 right_hip_pitch_position   = []
