@@ -49,6 +49,13 @@ for drive in ODriveSet:
     drive.motor1.config.vel_gain = 5.0 / 10000.0   # [A/(counts/s)]
     drive.motor1.config.vel_integrator_gain = 10.0 / 10000.0
 
+#################### assign ODrives #########################################
+for drive in ODriveSet:
+	if drive.serial_number == 53232789697077:
+		right_hip_drive = drive
+	if drive.serial_number == 61977222983735:
+		left_hip_drive  = drive
+
 #################### read-in trajectory from file ##############################
 
 right_hip_pitch_position   = []
@@ -81,10 +88,10 @@ print("Returning to zero position...\n")
 # my_drive.motor0.set_pos_setpoint(0.0, 0.0, 0.0)
 # my_drive.motor1.set_pos_setpoint(0.0, 0.0, 0.0)
 
-ODriveSet[0].motor0.set_pos_setpoint(0.0, 0.0, 0.0)
-ODriveSet[0].motor1.set_pos_setpoint(0.0, 0.0, 0.0)
-ODriveSet[1].motor0.set_pos_setpoint(0.0, 0.0, 0.0)
-ODriveSet[1].motor1.set_pos_setpoint(0.0, 0.0, 0.0)
+right_hip_drive.motor0.set_pos_setpoint(0.0, 0.0, 0.0)
+right_hip_drive.motor1.set_pos_setpoint(0.0, 0.0, 0.0)
+left_hip_drive.motor0.set_pos_setpoint(0.0, 0.0, 0.0)
+left_hip_drive.motor1.set_pos_setpoint(0.0, 0.0, 0.0)
 
 #################### begin trajectory ##########################################
 
@@ -93,7 +100,7 @@ print("Running trajectory... (press Ctrl+C to stop)")
 i = 0   # counter
 
 # speed multiplier, for faster movement
-speed_multiplier = 8                  # speed multiplier
+speed_multiplier = 4                  # speed multiplier
 i_max = int(j / speed_multiplier) - 1 # max value of i, calculated based on j
                                       #   and speed multiplier
 print("Speed multiplier: {}".format(speed_multiplier))
@@ -115,10 +122,10 @@ while True:
     # my_drive.motor1.set_pos_setpoint(setpoint_left_slide, 0.0, 0.0)
     # my_drive.motor0.set_pos_setpoint(setpoint_left_pitch, 0.0, 0.0)
 
-    ODriveSet[0].motor1.set_pos_setpoint(setpoint_left_slide, 0.0, 0.0)
-    ODriveSet[0].motor0.set_pos_setpoint(setpoint_left_pitch, 0.0, 0.0)
-    ODriveSet[1].motor1.set_pos_setpoint(setpoint_right_slide, 0.0, 0.0)
-    ODriveSet[1].motor0.set_pos_setpoint(setpoint_right_pitch, 0.0, 0.0)
+    left_hip_drive.motor1.set_pos_setpoint(setpoint_left_slide, 0.0, 0.0)
+    left_hip_drive.motor0.set_pos_setpoint(setpoint_left_pitch, 0.0, 0.0)
+    right_hip_drive.motor1.set_pos_setpoint(setpoint_right_slide, 0.0, 0.0)
+    right_hip_drive.motor0.set_pos_setpoint(setpoint_right_pitch, 0.0, 0.0)
 
     #print("{}\t{:.5f}\t{:.5f}".format(i,setpoint_left_slide,setpoint_left_pitch))
     i = i + 1
