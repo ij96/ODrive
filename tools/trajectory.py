@@ -9,8 +9,15 @@ from openpyxl import load_workbook
 from openpyxl import Workbook
 import csv
 
+#################### adjustable parameters #####################################
+trajectory_file_path = './traj_test.csv' # trajectory CSV file
+speed_multiplier = 8                     # speed multiplier, for faster movement
+
+print("\nRunning trajectory from {}".format(trajectory_file_path))
+print("Trajectory speed multiplier: {}".format(speed_multiplier))
+
 #################### ODrive discovery ##########################################
-print("Finding ODrives...")
+print("\nFinding ODrives...")
 
 ODriveSet = []
 
@@ -22,18 +29,7 @@ if len(ODriveSet) == 0:
     print("No ODrives found!")
     exit()
 else:
-    print("Found {} ODrives\n".format(len(ODriveSet)))
-
-#################### parameter configuration ###################################
-for drive in ODriveSet:
-    # M0
-    drive.motor0.encoder.config.cpr = ENCODER_CPR
-    drive.motor0.config.pole_pairs = 7
-    drive.motor0.config.calibration_current = 20.0
-    # M1
-    drive.motor1.encoder.config.cpr = ENCODER_CPR
-    drive.motor1.config.pole_pairs = 7
-    drive.motor1.config.calibration_current = 20.0
+    print("Found {} ODrives".format(len(ODriveSet)))
 
 #################### PID tuning ################################################
 for drive in ODriveSet:
@@ -42,11 +38,11 @@ for drive in ODriveSet:
     drive.motor0.config.vel_gain = 3.0 / 10000.0   # [A/(counts/s)]
     drive.motor0.config.vel_integrator_gain = 10.0 / 10000.0
     # M1
-    drive.motor1.config.pos_gain = 20.0            # [(counts/s) / counts]
-    drive.motor1.config.vel_gain = 5.0 / 10000.0   # [A/(counts/s)]
+    drive.motor1.config.pos_gain = 5.0            # [(counts/s) / counts]
+    drive.motor1.config.vel_gain = 3.0 / 10000.0   # [A/(counts/s)]
     drive.motor1.config.vel_integrator_gain = 10.0 / 10000.0
 
-#################### assign ODrives #########################################
+#################### assign ODrives ############################################
 for drive in ODriveSet:
     if drive.serial_number == 53232789697077:
         ankle_drive     = drive
@@ -63,58 +59,51 @@ left_hip_pitch_position    = []
 left_hip_slide_position    = []
 left_ankle_pitch_position  = []
 
-j = -1
-filePath = './'
+traj_size = -1
 
-with open(filePath + 'traj_test.csv') as csvfile:
+with open(trajectory_file_path) as csvfile:
     readCSV = csv.reader(csvfile, delimiter=',')
     for row in readCSV:
-        if j > -1:
+        if traj_size > -1:
             right_hip_pitch_position.append(float(row[0]))
             right_hip_slide_position.append(float(row[1]))
             right_ankle_pitch_position.append(float(row[2]))
             left_hip_pitch_position.append(float(row[3]))
             left_hip_slide_position.append(float(row[4]))
             left_ankle_pitch_position.append(float(row[5]))
-        j = j + 1
+        traj_size = traj_size + 1
 
-print("Trajectory size: {}\n".format(j))
+print("\nTrajectory size: {}".format(traj_size))
 
 #################### zero position #############################################
-print("Returning to zero position...\n")
+print("\nReturning to zero position...")
 
 for drive in ODriveSet:
     drive.motor0.set_pos_setpoint(0.0, 0.0, 0.0)
     drive.motor1.set_pos_setpoint(0.0, 0.0, 0.0)
 
 #################### begin trajectory ##########################################
-
-print("Running trajectory... (press Ctrl+C to stop)")
+print("\nRunning trajectory... (press Ctrl+C to stop)")
 
 i = 0   # counter
 
-# speed multiplier, for faster movement
-speed_multiplier = 8                  # speed multiplier
-i_max = int(j / speed_multiplier) - 1 # max value of i, calculated based on j
-                                      #   and speed multiplier
-print("Speed multiplier: {}".format(speed_multiplier))
+i_max = int(traj_size / speed_multiplier) - 1 # max value of i, calculated based
+                                              #   traj size and speed multiplier
 
 while True:
     if i > i_max:
         i = 0
-        # ODriveSet[0].motor0.set_pos_setpoint(0.0, 0.0, 0.0)
-        # ODriveSet[0].motor1.set_pos_setpoint(0.0, 0.0, 0.0)
-        # ODriveSet[1].motor0.set_pos_setpoint(0.0, 0.0, 0.0)
-        # ODriveSet[1].motor1.set_pos_setpoint(0.0, 0.0, 0.0)
 
-    setpoint_left_pitch = 30558.0 * left_hip_pitch_position[i*speed_multiplier+1] # gear ratio: 1:24, 1/3.1415*24*4000
-    setpoint_left_slide = -400000.0 * left_hip_slide_position[i*speed_multiplier+1] # gear ratio: 1:4, 4*4000*4, problem with encoder
-    setpoint_right_pitch = -30558.0 * right_hip_pitch_position[i*speed_multiplier+1] # gear ratio: 1:24, 1/3.1415*24*4000
-    setpoint_right_slide = 400000.0 * right_hip_slide_position[i*speed_multiplier+1] # gear ratio: 1:4, 4*4000*4, problem with encoder
-    setpoint_right_anklePitch = 64000.0 * right_ankle_pitch_position[i*speed_multiplier+1]*3 # gear ratio: 1:16
-    setpoint_left_anklePitch = -64000.0 * left_ankle_pitch_position[i*speed_multiplier+1]*3 # gear ratio: 1:16
+    setpoint_index = i * speed_multiplier + 1
 
-############################### Sending commands to corresponding motors ###############################################
+    setpoint_left_pitch       = 30558.0 *   left_hip_pitch_position[setpoint_index] # gear ratio: 1:24, 1/3.1415*24*4000
+    setpoint_left_slide       = -400000.0 * left_hip_slide_position[setpoint_index] # gear ratio: 1:4, 4*4000*4, problem with encoder
+    setpoint_right_pitch      = -30558.0 *  right_hip_pitch_position[setpoint_index] # gear ratio: 1:24, 1/3.1415*24*4000
+    setpoint_right_slide      = 400000.0 *  right_hip_slide_position[setpoint_index] # gear ratio: 1:4, 4*4000*4, problem with encoder
+    setpoint_right_anklePitch = 64000.0  *  right_ankle_pitch_position[setpoint_index] * 3 # gear ratio: 1:16
+    setpoint_left_anklePitch  = -64000.0 *  left_ankle_pitch_position[setpoint_index]  * 3 # gear ratio: 1:16
+
+    ################ sending commands to corresponding motors ##################
     left_hip_drive.motor1.set_pos_setpoint(setpoint_left_slide, 0.0, 0.0)
     left_hip_drive.motor0.set_pos_setpoint(setpoint_left_pitch, 0.0, 0.0)
     right_hip_drive.motor1.set_pos_setpoint(setpoint_right_slide, 0.0, 0.0)
@@ -122,7 +111,6 @@ while True:
     ankle_drive.motor0.set_pos_setpoint(setpoint_left_anklePitch, 0.0, 0.0) 
     ankle_drive.motor1.set_pos_setpoint(setpoint_right_anklePitch, 0.0, 0.0)
 
-    #print("{}\t{:.5f}\t{:.5f}".format(i,setpoint_left_slide,setpoint_left_pitch))
     i = i + 1
 
     time.sleep(0.001)
