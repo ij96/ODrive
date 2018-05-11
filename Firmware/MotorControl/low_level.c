@@ -33,6 +33,7 @@
 // Arbitrary non-zero inital value to avoid division by zero if ADC reading is late
 float vbus_voltage = 12.0f;
 
+#define ENCODER_CPR 4000
 #if HW_VERSION_MAJOR == 3
 #if HW_VERSION_MINOR <= 3
 #define SHUNT_RESISTANCE (675e-6f)
@@ -123,7 +124,7 @@ Motor_t motors[] = {
             .index_found = false,
             .manually_calibrated = false,
             .idx_search_speed = 10.0f, // [rad/s electrical]
-            .encoder_cpr = (2048 * 4), // Default resolution of CUI-AMT102 encoder,
+            .encoder_cpr = ENCODER_CPR, // Default resolution of CUI-AMT102 encoder,
             .encoder_offset = 0,
             .encoder_state = 0,
             .motor_dir = 1,   // 1 or -1
@@ -229,7 +230,7 @@ Motor_t motors[] = {
             .index_found = false,
             .manually_calibrated = false,
             .idx_search_speed = 10.0f, // [rad/s electrical]
-            .encoder_cpr = (2048 * 4), // Default resolution of CUI-AMT102 encoder,
+            .encoder_cpr = ENCODER_CPR, // Default resolution of CUI-AMT102 encoder,
             .encoder_offset = 0,
             .encoder_state = 0,
             .motor_dir = 1,   // 1 or -1
