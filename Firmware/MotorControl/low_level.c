@@ -35,6 +35,7 @@ float vbus_voltage = 12.0f;
 
 #define ENCODER_CPR 4000
 #define POLE_PAIRS 7
+//#define POLE_PAIRS 20 // for hip roll motors
 const float elec_rad_per_enc = POLE_PAIRS * 2 * M_PI * (1.0f / (float)(ENCODER_CPR));
 #if HW_VERSION_MAJOR == 3
 #if HW_VERSION_MINOR <= 3
@@ -57,7 +58,7 @@ Motor_t motors[] = {
         .enable_step_dir = false,                    //auto enabled after calibration
         .counts_per_step = 2.0f,
         .error = ERROR_NO_ERROR,
-        .pole_pairs = 7, // This value is correct for N5065 motors and Turnigy SK3 series.
+        .pole_pairs = POLE_PAIRS, // This value is correct for N5065 motors and Turnigy SK3 series.
         .pos_setpoint = 0.0f,
         .pos_gain = 20.0f,  // [(counts/s) / counts]
         .vel_setpoint = 0.0f,
@@ -169,7 +170,7 @@ Motor_t motors[] = {
         .enable_step_dir = false,                    //auto enabled after calibration
         .counts_per_step = 2.0f,
         .error = ERROR_NO_ERROR,
-        .pole_pairs = 7, // This value is correct for N5065 motors and Turnigy SK3 series.
+        .pole_pairs = POLE_PAIRS, // This value is correct for N5065 motors and Turnigy SK3 series.
         .pos_setpoint = 0.0f,
         .pos_gain = 20.0f,  // [(counts/s) / counts]
         .vel_setpoint = 0.0f,
