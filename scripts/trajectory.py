@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# Trajectory
+
 from __future__ import print_function
 
 import odrive.core
