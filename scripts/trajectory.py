@@ -102,8 +102,8 @@ while True:
     setpoint_left_slide       = -400000.0 * left_hip_slide_position[setpoint_index] # gear ratio: 1:4, 4*4000*4, problem with encoder
     setpoint_right_pitch      = -30558.0 *  right_hip_pitch_position[setpoint_index] # gear ratio: 1:24, 1/3.1415*24*4000
     setpoint_right_slide      = 400000.0 *  right_hip_slide_position[setpoint_index] # gear ratio: 1:4, 4*4000*4, problem with encoder
-    setpoint_right_anklePitch = 64000.0  *  right_ankle_pitch_position[setpoint_index] * 3 # gear ratio: 1:16
-    setpoint_left_anklePitch  = -64000.0 *  left_ankle_pitch_position[setpoint_index]  * 3 # gear ratio: 1:16
+    setpoint_right_anklePitch = 48000.0  *  right_ankle_pitch_position[setpoint_index] * 3 # gear ratio: 1:12
+    setpoint_left_anklePitch  = -48000.0 *  left_ankle_pitch_position[setpoint_index]  * 3 # gear ratio: 1:12
 
     ################ sending commands to corresponding motors ##################
     left_hip_drive.motor1.set_pos_setpoint(setpoint_left_slide, 0.0, 0.0)
