@@ -34,7 +34,8 @@
 float vbus_voltage = 12.0f;
 
 #define ENCODER_CPR 4000
-#define POLE_PAIRS 7
+#define POLE_PAIRS 7 // default
+//#define POLE_PAIRS 11 // for red motors
 //#define POLE_PAIRS 20 // for hip roll motors
 const float elec_rad_per_enc = POLE_PAIRS * 2 * M_PI * (1.0f / (float)(ENCODER_CPR));
 #if HW_VERSION_MAJOR == 3
