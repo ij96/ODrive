@@ -1,0 +1,9 @@
+# install package prerequisites
+sudo apt install python3-pip; sudo pip3 install --upgrade pip; sudo pip3 install pyserial pyusb
+sudo apt install gcc-arm-none-eabi gdb-arm-none-eabi openocd
+sudo add-apt-repository ppa:jonathonf/tup; sudo apt-get update; sudo apt-get install tup
+
+# Linux usb permission setup
+echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1209", ATTR{idProduct}=="0d[0-9][0-9]", MODE="0666"' | sudo tee /etc/udev/rules.d/50-odrive.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
