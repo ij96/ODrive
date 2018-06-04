@@ -1322,6 +1322,7 @@ bool FOC_current(Motor_t* motor, float Id_des, float Iq_des) {
 
 //Returns true if everything is OK (no fault)
 bool check_DRV_fault(Motor_t* motor) {
+    return true; // skip for v3.1
     //TODO: make this pin configurable per motor ch
     GPIO_PinState nFAULT_state = HAL_GPIO_ReadPin(nFAULT_GPIO_Port, nFAULT_Pin);
     return (nFAULT_state == GPIO_PIN_RESET) ? false : true; // was true : false in older versions

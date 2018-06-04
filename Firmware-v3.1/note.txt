@@ -1,0 +1,4 @@
+for v3.1:
+- in check_DRV_fault, put "return true;" as the first line in the function
+- on the ODrive board, put a jumper wire between 5V and EV of the header J3
+- labelling of M0 and M1 are reversed on J3 - so if using M0, plug in the encoder wires to the header pins labelled M1, and vice versa
