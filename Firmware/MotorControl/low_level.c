@@ -49,6 +49,19 @@ const float elec_rad_per_enc = POLE_PAIRS * 2 * M_PI * (1.0f / (float)(ENCODER_C
 #endif
 #endif
 
+#define MO_MANUALLY_CALIBRATED  false
+#define M1_MANUALLY_CALIBRATED  true
+
+#define M0_ENCODER_OFFSET       1862
+#define M0_ENCODER_MOTOR_DIR    1
+#define M0_PHASE_INDUCTANCE     1.927548146340996e-05
+#define M0_PHASE_RESISTANCE     0.05286795645952225
+
+#define M1_ENCODER_OFFSET       1862
+#define M1_ENCODER_MOTOR_DIR    1
+#define M1_PHASE_INDUCTANCE     1.927548146340996e-05
+#define M1_PHASE_RESISTANCE     0.05286795645952225
+
 // TODO: Migrate to C++, clearly we are actually doing object oriented code here...
 // TODO: For nice encapsulation, consider not having the motor objects public
 
@@ -78,8 +91,8 @@ Motor_t motors[] = {
         .resistance_calib_max_voltage = 1.0f, // [V] - You may need to increase this if this voltage isn't sufficient to drive calibration_current through the motor.
         .dc_bus_undervoltage_trip_level = 8.0f, // [V]
         .dc_bus_overvoltage_trip_level = VBUS_OVERVOLTAGE_LEVEL, // [V]
-        .phase_inductance = 0.0f,        // to be set by measure_phase_inductance
-        .phase_resistance = 0.0f,        // to be set by measure_phase_resistance
+        .phase_inductance = M0_PHASE_INDUCTANCE,        // to be set by measure_phase_inductance
+        .phase_resistance = M0_PHASE_RESISTANCE,        // to be set by measure_phase_resistance
         .motor_thread = 0,
         .thread_ready = false,
         // .enable_control = true,
@@ -129,13 +142,13 @@ Motor_t motors[] = {
             .encoder_timer = &htim3,
             .use_index = false,
             .index_found = false,
-            .manually_calibrated = false,
+            .manually_calibrated = MO_MANUALLY_CALIBRATED,
             .use_absolute = true,
             .idx_search_speed = 10.0f, // [rad/s electrical]
             .encoder_cpr = ENCODER_CPR, // Default resolution of CUI-AMT102 encoder,
-            .encoder_offset = 0,
+            .encoder_offset = M0_ENCODER_OFFSET,
             .encoder_state = 0,
-            .motor_dir = 1,   // 1 or -1
+            .motor_dir = M0_ENCODER_MOTOR_DIR,   // 1 or -1
             .encoder_calib_range = 0.02,
             .phase = 0.0f,    // [rad]
             .pll_pos = 0.0f,  // [rad]
@@ -194,8 +207,8 @@ Motor_t motors[] = {
         .resistance_calib_max_voltage = 1.0f, // [V] - You may need to increase this if this voltage isn't sufficient to drive calibration_current through the motor.
         .dc_bus_undervoltage_trip_level = 8.0f, // [V]
         .dc_bus_overvoltage_trip_level = VBUS_OVERVOLTAGE_LEVEL, // [V]
-        .phase_inductance = 0.0f,                 // to be set by measure_phase_inductance
-        .phase_resistance = 0.0f,                 // to be set by measure_phase_resistance
+        .phase_inductance = M1_PHASE_INDUCTANCE,                 // to be set by measure_phase_inductance
+        .phase_resistance = M1_PHASE_RESISTANCE,                 // to be set by measure_phase_resistance
         .motor_thread = 0,
         .thread_ready = false,
         // .enable_control = true,
@@ -242,7 +255,7 @@ Motor_t motors[] = {
             .encoder_timer = &htim4,
             .use_index = false,
             .index_found = false,
-            .manually_calibrated = false,
+            .manually_calibrated = M1_MANUALLY_CALIBRATED,
             .use_absolute = true,
             .idx_search_speed = 10.0f, // [rad/s electrical]
             .encoder_cpr = ENCODER_CPR, // Default resolution of CUI-AMT102 encoder,

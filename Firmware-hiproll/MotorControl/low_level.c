@@ -34,8 +34,12 @@
 float vbus_voltage = 12.0f;
 
 #define ENCODER_CPR 4000
-//#define POLE_PAIRS 7
+// #define POLE_PAIRS 7 // default
+//#define POLE_PAIRS 11 // for red motors
 #define POLE_PAIRS 20 // for hip roll motors
+
+uint16_t as5047p_data = 0;
+
 const float elec_rad_per_enc = POLE_PAIRS * 2 * M_PI * (1.0f / (float)(ENCODER_CPR));
 #if HW_VERSION_MAJOR == 3
 #if HW_VERSION_MINOR <= 3
@@ -44,6 +48,19 @@ const float elec_rad_per_enc = POLE_PAIRS * 2 * M_PI * (1.0f / (float)(ENCODER_C
 #define SHUNT_RESISTANCE (500e-6f)
 #endif
 #endif
+
+#define MO_MANUALLY_CALIBRATED  true
+#define M1_MANUALLY_CALIBRATED  true
+
+#define M0_ENCODER_OFFSET       2239
+#define M0_ENCODER_MOTOR_DIR    -1
+#define M0_PHASE_INDUCTANCE     1.8592700143926777e-05f
+#define M0_PHASE_RESISTANCE     0.049098901450634f
+
+#define M1_ENCODER_OFFSET       1862
+#define M1_ENCODER_MOTOR_DIR    1
+#define M1_PHASE_INDUCTANCE     1.927548146340996e-05
+#define M1_PHASE_RESISTANCE     0.05286795645952225
 
 // TODO: Migrate to C++, clearly we are actually doing object oriented code here...
 // TODO: For nice encapsulation, consider not having the motor objects public
@@ -74,8 +91,8 @@ Motor_t motors[] = {
         .resistance_calib_max_voltage = 1.0f, // [V] - You may need to increase this if this voltage isn't sufficient to drive calibration_current through the motor.
         .dc_bus_undervoltage_trip_level = 8.0f, // [V]
         .dc_bus_overvoltage_trip_level = VBUS_OVERVOLTAGE_LEVEL, // [V]
-        .phase_inductance = 0.0f,        // to be set by measure_phase_inductance
-        .phase_resistance = 0.0f,        // to be set by measure_phase_resistance
+        .phase_inductance = M0_PHASE_INDUCTANCE,        // to be set by measure_phase_inductance
+        .phase_resistance = M0_PHASE_RESISTANCE,        // to be set by measure_phase_resistance
         .motor_thread = 0,
         .thread_ready = false,
         // .enable_control = true,
@@ -125,12 +142,13 @@ Motor_t motors[] = {
             .encoder_timer = &htim3,
             .use_index = false,
             .index_found = false,
-            .manually_calibrated = false,
+            .manually_calibrated = MO_MANUALLY_CALIBRATED,
+            .use_absolute = true,
             .idx_search_speed = 10.0f, // [rad/s electrical]
             .encoder_cpr = ENCODER_CPR, // Default resolution of CUI-AMT102 encoder,
-            .encoder_offset = 0,
+            .encoder_offset = M0_ENCODER_OFFSET,
             .encoder_state = 0,
-            .motor_dir = 1,   // 1 or -1
+            .motor_dir = M0_ENCODER_MOTOR_DIR,   // 1 or -1
             .encoder_calib_range = 0.02,
             .phase = 0.0f,    // [rad]
             .pll_pos = 0.0f,  // [rad]
@@ -163,6 +181,12 @@ Motor_t motors[] = {
             .calib_pos_threshold = 1.0f,
             .calib_vel_threshold = 1.0f,
         },
+        .AS5047PEncoder = {
+            .spiHandle = &hspi3,
+            .nCSgpioHandle = GPIO_3_GPIO_Port,
+            .nCSgpioNumber = GPIO_3_Pin,
+            .encoder_angle = 0.0f,
+        },
         .drv_fault = DRV8301_FaultType_NoFault,
     },
     {                                             // M1
@@ -183,8 +207,8 @@ Motor_t motors[] = {
         .resistance_calib_max_voltage = 1.0f, // [V] - You may need to increase this if this voltage isn't sufficient to drive calibration_current through the motor.
         .dc_bus_undervoltage_trip_level = 8.0f, // [V]
         .dc_bus_overvoltage_trip_level = VBUS_OVERVOLTAGE_LEVEL, // [V]
-        .phase_inductance = 0.0f,                 // to be set by measure_phase_inductance
-        .phase_resistance = 0.0f,                 // to be set by measure_phase_resistance
+        .phase_inductance = M1_PHASE_INDUCTANCE,                 // to be set by measure_phase_inductance
+        .phase_resistance = M1_PHASE_RESISTANCE,                 // to be set by measure_phase_resistance
         .motor_thread = 0,
         .thread_ready = false,
         // .enable_control = true,
@@ -231,7 +255,8 @@ Motor_t motors[] = {
             .encoder_timer = &htim4,
             .use_index = false,
             .index_found = false,
-            .manually_calibrated = false,
+            .manually_calibrated = M1_MANUALLY_CALIBRATED,
+            .use_absolute = true,
             .idx_search_speed = 10.0f, // [rad/s electrical]
             .encoder_cpr = ENCODER_CPR, // Default resolution of CUI-AMT102 encoder,
             .encoder_offset = 0,
@@ -268,6 +293,12 @@ Motor_t motors[] = {
             .calib_anticogging = false,
             .calib_pos_threshold = 1.0f,
             .calib_vel_threshold = 1.0f,
+        },
+        .AS5047PEncoder = {
+            .spiHandle = &hspi3,
+            .nCSgpioHandle = GPIO_4_GPIO_Port,
+            .nCSgpioNumber = GPIO_4_Pin,
+            .encoder_angle = 0.0f,
         },
         .drv_fault = DRV8301_FaultType_NoFault,
     }
@@ -960,6 +991,45 @@ bool scan_for_enc_idx(Motor_t* motor, float omega, float voltage_magnitude) {
     }
 }
 
+bool update_init_cnt_value(Motor_t* argument){
+
+    // Motor_t* motor = (Motor_t*)argument;
+
+    Motor_t* motor = (Motor_t*)&motors[0];
+
+    if (motor->encoder.use_absolute){
+        // AEAT_6012_A06_Obj* absEncoder = &motor->absEncoder;
+        // CUI_Obj* cuiEncoder = &motor->CUIEncoder;
+        AS5047P_Obj* AS5047PEncoder = &motor->AS5047PEncoder;
+
+        as5047p_data = AS5047P_readPosition(AS5047PEncoder);
+        osDelay(100);
+        as5047p_data = as5047p_data & 0x3FFF;
+        AS5047PEncoder->encoder_angle = (as5047p_data/16383.0)*360;
+        AS5047PEncoder->encoder_cnt = (as5047p_data) * 4000/16383;
+
+        setEncoderCount(motor, (uint32_t)AS5047PEncoder->encoder_cnt);
+
+        set_pos_setpoint(motor, AS5047PEncoder->encoder_cnt, 0.0f, 0.0f);
+    }
+
+    return true;
+}
+
+void test_encoder(){
+    Motor_t* motor = (Motor_t*)&motors[0];
+    AS5047P_Obj* AS5047PEncoder = &motor->AS5047PEncoder;
+    as5047p_data = AS5047P_readPosition(AS5047PEncoder);
+    osDelay(100);
+    as5047p_data = as5047p_data & 0x3FFF;
+    AS5047PEncoder->encoder_angle = (as5047p_data/16383.0)*360;
+    AS5047PEncoder->encoder_cnt = (as5047p_data) * 4000/16383;
+
+    setEncoderCount(motor, (uint32_t)AS5047PEncoder->encoder_cnt);
+
+    set_pos_setpoint(motor, AS5047PEncoder->encoder_cnt, 0.0f, 0.0f);
+}
+
 //--------------------------------
 // Main motor control
 //--------------------------------
@@ -1470,4 +1540,32 @@ void control_motor_loop(Motor_t* motor) {
     //We are exiting control, reset Ibus, and update brake current
     motor->current_control.Ibus = 0.0f;
     update_brake_current();
+}
+
+//--------------------------------
+// Encoder thread
+//--------------------------------
+
+void AS5047P_thread(void const * argument){
+
+    // HAL_SPI_MspDeInit(&hspi3);
+
+    // osDelay(10);
+
+    // HAL_SPI_DeInit(&hspi3);
+
+    // MX_SPI3_Init_8bit();
+
+    Motor_t* motor = (Motor_t*)argument;
+    // AEAT_6012_A06_Obj* absEncoder = &motor->absEncoder;
+    // CUI_Obj* cuiEncoder = &motor->CUIEncoder;
+    AS5047P_Obj* AS5047PEncoder = &motor->AS5047PEncoder;
+
+    for (;;){
+        // abs_data = AEAT_6012_A06_readAngle(absEncoder);
+        as5047p_data = AS5047P_readPosition(AS5047PEncoder);
+        osDelay(100);
+        as5047p_data = as5047p_data & 0x3FFF;
+        AS5047PEncoder->encoder_angle = (as5047p_data/16383.0)*360;
+    }
 }
