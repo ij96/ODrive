@@ -49,18 +49,18 @@ const float elec_rad_per_enc = POLE_PAIRS * 2 * M_PI * (1.0f / (float)(ENCODER_C
 #endif
 #endif
 
-#define MO_MANUALLY_CALIBRATED  false
+#define MO_MANUALLY_CALIBRATED  true // true for no further calibration
 #define M1_MANUALLY_CALIBRATED  true
 
-#define M0_ENCODER_OFFSET       1862
+#define M0_ENCODER_OFFSET       3347
 #define M0_ENCODER_MOTOR_DIR    1
-#define M0_PHASE_INDUCTANCE     1.927548146340996e-05
-#define M0_PHASE_RESISTANCE     0.05286795645952225
+#define M0_PHASE_INDUCTANCE     1.7567354007042013e-05f
+#define M0_PHASE_RESISTANCE     0.03662428632378578f
 
-#define M1_ENCODER_OFFSET       1862
-#define M1_ENCODER_MOTOR_DIR    1
-#define M1_PHASE_INDUCTANCE     1.927548146340996e-05
-#define M1_PHASE_RESISTANCE     0.05286795645952225
+#define M1_ENCODER_OFFSET       -2284
+#define M1_ENCODER_MOTOR_DIR    -1
+#define M1_PHASE_INDUCTANCE     1.0961379302898422e-05f
+#define M1_PHASE_RESISTANCE     0.03429623693227768f
 
 // TODO: Migrate to C++, clearly we are actually doing object oriented code here...
 // TODO: For nice encapsulation, consider not having the motor objects public

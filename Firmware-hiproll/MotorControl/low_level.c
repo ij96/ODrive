@@ -49,7 +49,7 @@ const float elec_rad_per_enc = POLE_PAIRS * 2 * M_PI * (1.0f / (float)(ENCODER_C
 #endif
 #endif
 
-#define MO_MANUALLY_CALIBRATED  true
+#define MO_MANUALLY_CALIBRATED  true // true for no further calibration
 #define M1_MANUALLY_CALIBRATED  true
 
 #define M0_ENCODER_OFFSET       2239
@@ -85,7 +85,7 @@ Motor_t motors[] = {
         .vel_integrator_gain = 10.0f / 10000.0f,  // [A/(counts/s * s)]
         // .vel_integrator_gain = 0.0f, // [A/(rad/s * s)] <sensorless example>
         .vel_integrator_current = 0.0f,  // [A]
-        .vel_limit = 20000.0f,           // [counts/s]
+        .vel_limit = 40000.0f,           // [counts/s]
         .current_setpoint = 0.0f,        // [A]
         .calibration_current = 15.0f,    // [A]
         .resistance_calib_max_voltage = 1.0f, // [V] - You may need to increase this if this voltage isn't sufficient to drive calibration_current through the motor.
@@ -201,7 +201,7 @@ Motor_t motors[] = {
         .vel_gain = 5.0f / 10000.0f,             // [A/(counts/s)]
         .vel_integrator_gain = 10.0f / 10000.0f,  // [A/(counts/s * s)]
         .vel_integrator_current = 0.0f,           // [A]
-        .vel_limit = 20000.0f,                    // [counts/s]
+        .vel_limit = 40000.0f,                    // [counts/s]
         .current_setpoint = 0.0f,                 // [A]
         .calibration_current = 15.0f,             // [A]
         .resistance_calib_max_voltage = 1.0f, // [V] - You may need to increase this if this voltage isn't sufficient to drive calibration_current through the motor.
