@@ -1,0 +1,10 @@
+Hip Roll:    1:36
+Hip Pitch:   1:43.2
+Hip Slide:   1:6
+Ankle 1 DOF: 1:12
+Ankle 2 Dof: 1:16
+
+
+left slide (0): offset 2276, motor_dir 1
+left pitch (1): offset 2326, motor_dir 1
+
